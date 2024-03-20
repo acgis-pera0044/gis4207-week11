@@ -17,7 +17,12 @@ def main():
         print(f"{in_txt} text file does not exist.")
         sys.exit()
     
+    # Time it takes to create feature class
+    import time
+    start = time.perf_counter()
     _creating_polyline_geometries(in_txt, out_shp)
+    end = time.perf_counter()
+    print(f"Elapsed using feature class as output: {end - start} s")
 
 
 def _txt_to_dict(in_txt):
