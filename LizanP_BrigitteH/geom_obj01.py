@@ -1,6 +1,35 @@
-in_txt = r'C:\acgis\gis4207_prog\data\Week11\canada.txt'
-out_shp = r'C:\acgis\gis4207_prog\data\Week11\outputs\canada.shp'
+import sys
+import os
+
+#in_txt = r'C:\acgis\gis4207_prog\data\Week11\canada.txt'
+#out_shp = r'C:\acgis\gis4207_prog\data\Week11\outputs\canada.shp'
+
+def main():
+
+    if len(sys.argv) != 3:
+        print('Usage geom_obj01.py in_txt out_shp')
+        sys.exit()
+    
+    in_txt = sys.argv[1] 
+    out_shp = sys.argv[2]
+    
+    if not os.path.exists(in_txt):
+        print(f"{in_txt} text file does not exist.")
+        sys.exit()
+    
+    _creating_polyline_geometries(in_txt, out_shp)
+
+
 def _txt_to_dict(in_txt):
+    """Reading in the text file and converting it to a dictionnary with 
+    polyline ID as keys and coordinates of polyline vertices as values
+
+    Args:
+        in_txt (path): text file with polyline ID and coordinates
+
+    Returns:
+        dictionnary: dictionnary of polyline ID (keys) and coordinates of polyline vertices (values)
+    """
     with open (in_txt) as infile:
         dict_polylines = {}
         for line in infile:
@@ -16,13 +45,14 @@ def _txt_to_dict(in_txt):
                 dict_polylines[key_dict] = polyline_coordinates
     return dict_polylines
 
-def creating_polyline_geometries():
+def _creating_polyline_geometries(in_txt, out_shp):
+    """Creating polyline geometries as a feature class than can be opened in ArcGIS Pro
+    """
     dict_polylines = _txt_to_dict(in_txt)
     raw_polylines = []
     polylines = []
 
     import arcpy
-    import os
 
     arcpy.env.overwriteOutput = True
 
@@ -45,7 +75,6 @@ def creating_polyline_geometries():
         for polyline in polylines:
             cursor.insertRow([polyline])
 
-creating_polyline_geometries()
-
-
+if __name__ == '__main__':
+    main()
 
