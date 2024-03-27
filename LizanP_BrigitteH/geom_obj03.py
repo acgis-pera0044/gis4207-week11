@@ -51,6 +51,4 @@ def get_stop_id_to_da_data():
 
     for stop_id in stop_id_to_DA_data:
         for data in stop_id_to_DA_data[stop_id]:
-            print(stop_id, data)
-
-get_stop_id_to_da_data()
+            return stop_id, data
