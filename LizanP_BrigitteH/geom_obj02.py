@@ -2,13 +2,13 @@ import sys
 import os
 
 #Usage command line arguments to use in command line
-#in_txt = r'C:\acgis\gis4207_prog\data\Week11\canada.txt'
-#out_shp = r'C:\acgis\gis4207_prog\data\Week11\outputs\canada.shp'
+#in_txt = r'C:\acgis\gis4207_prog\data\Week11\test.txt'
+#out_shp = r'C:\acgis\gis4207_prog\data\Week11\outputs\test.shp'
 
 def main():
 
     if len(sys.argv) != 3:
-        print('Usage geom_obj01.py in_txt out_shp')
+        print('Usage: geom_obj02.py in_txt out_shp')
         sys.exit()
     
     in_txt = sys.argv[1] 
@@ -44,18 +44,19 @@ def _txt_to_dict(in_txt):
                 key_dict = int(line_stripped)
                 polyline_coordinates = []
             else:
-                point_coordinates = []
-                for coordinate in line_stripped.split():
-                    point_coordinates.append(float(coordinate))
+                seperated_coordinates = line_stripped.split()
+                x = float(seperated_coordinates[0])
+                y = float(seperated_coordinates[1])
+                import arcpy
+                point_coordinates = f'{x} {y}'
                 polyline_coordinates.append(point_coordinates)
                 dict_polylines[key_dict] = polyline_coordinates
-    return dict_polylines
+        return dict_polylines
 
 def _creating_polyline_geometries(in_txt, out_shp):
     """Creating polyline geometries as a feature class than can be opened in ArcGIS Pro
     """
     dict_polylines = _txt_to_dict(in_txt)
-    raw_polylines = []
     polylines = []
 
     import arcpy
@@ -63,24 +64,28 @@ def _creating_polyline_geometries(in_txt, out_shp):
     arcpy.env.overwriteOutput = True
 
     #Using dictionary to create polylines
+
     for item in dict_polylines.values():
-        raw_polylines.append(item)
-    
+        wkt_linestring = f"""LINESTRING ("""
+        for coordinate in item:
+            wkt_linestring += f"""{coordinate.strip("'")}, """
+        wkt_stripped = wkt_linestring.rstrip(', ')
+        wkt_stripped += """)"""
+        spatial_reference = arcpy.SpatialReference(4326)
+        polyline = arcpy.FromWKT(wkt_stripped, spatial_reference)
+        polylines.append(polyline)
+
     #Creating empty feature class 
     out_name = os.path.basename(out_shp)
     out_path = os.path.dirname(out_shp)
     geometry_type = 'POLYLINE'
     WKID = '4326'
     fcPoly = arcpy.management.CreateFeatureclass(out_path, out_name, geometry_type, spatial_reference = WKID)[0]
-    
+
     #Using InsertCursor to add polylines to new feature class
-    for raw_polyline in raw_polylines:
-        polylines.append(arcpy.Polyline(arcpy.Array([arcpy.Point(*coords) for coords in raw_polyline])))
-    
     with arcpy.da.InsertCursor(fcPoly, ['SHAPE@']) as cursor:
         for polyline in polylines:
             cursor.insertRow([polyline])
 
 if __name__ == '__main__':
     main()
-
