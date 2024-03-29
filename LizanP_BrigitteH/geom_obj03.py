@@ -1,3 +1,5 @@
+import csv
+
 # Global variables
 stops_workspace = r'..\..\..\..\data\Ottawa\Stops'
 stop_name = 'GLADSTONE'
@@ -49,6 +51,20 @@ def get_stop_id_to_da_data():
                     intersected_da_data.append(data)
         stop_id_to_DA_data[stopid] = intersected_da_data
 
-    for stop_id in stop_id_to_DA_data:
-        for data in stop_id_to_DA_data[stop_id]:
-            return stop_id, data
+    return stop_id_to_DA_data
+
+def write_report(out_csv):
+    stop_id_to_DA_data = get_stop_id_to_da_data()
+    header = ['STOP ID', 'DACODE', 'DA_POPULATION', '%DA AREA', 'STOP_POP']
+    with open(out_csv, 'w', newline = '') as f:
+        writer = csv.writer(f)
+        writer.writerow(header)
+        for stop_id in stop_id_to_DA_data:
+            for data in stop_id_to_DA_data[stop_id]:
+                da_code = data[0]
+                da_population = data[1]
+                per_da_area = (data[2]/data[3])*100
+                stop_pop = int(da_population * per_da_area / 100)
+                row = [stop_id, da_code, da_population, per_da_area, stop_pop]
+                writer.writerow(row)
+
