@@ -28,19 +28,22 @@ def main():
 
 def _txt_to_dict(in_txt):
     """Reading in the text file and converting it to a dictionnary with 
-    polyline ID as keys and coordinates of polyline vertices as values
+    polyline ID as keys and a list of coordinates of polyline vertices as values
 
     Args:
         in_txt (path): text file with polyline ID and coordinates
 
     Returns:
-        dictionnary: dictionnary of polyline ID (keys) and coordinates of polyline vertices (values)
+        dictionary: dictionary of polyline ID (keys) and list of coordinates of polyline vertices (values)
     """
     with open (in_txt) as infile:
         dict_polylines = {}
+        key_dict = None
         for line in infile:
             line_stripped = line.rstrip('\n')
             if line_stripped.isdigit() == True:
+                if key_dict is not None: # Check if we are not reading the first line of the txt file
+                    dict_polylines[key_dict] = polyline_coordinates
                 key_dict = int(line_stripped)
                 polyline_coordinates = []
             else:
@@ -48,7 +51,9 @@ def _txt_to_dict(in_txt):
                 for coordinate in line_stripped.split():
                     point_coordinates.append(float(coordinate))
                 polyline_coordinates.append(point_coordinates)
-                dict_polylines[key_dict] = polyline_coordinates
+        if key_dict is not None: # Save the last set of coordinates to the dictionary
+            dict_polylines[key_dict] = polyline_coordinates
+                
     return dict_polylines
 
 def _creating_polyline_geometries(in_txt, out_shp):
