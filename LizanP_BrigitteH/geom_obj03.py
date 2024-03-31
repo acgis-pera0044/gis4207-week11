@@ -4,7 +4,7 @@ import csv
 stops_workspace = r'..\..\..\..\data\Ottawa\Stops'
 stop_name = 'GLADSTONE'
 stop_id_fc = 'Stops_UTM'
-dissemination_area_fc = 'OttawaDA_UTM'
+dissemination_area_fc = r'..\OttawaDA_UTM\OttawaDA_UTM'
 da_population_field = 'POP_2016'
 
 def get_stop_id_to_da_data():
